@@ -18,7 +18,7 @@ let envSplit = ["\n", "&", "@"]         // 多个变量分隔符
 const ckFile = `${env}.txt`              // 不用管, 默认就是英文 名字.txt
 
 //====================================================================================================
-const ck_ = ''        // 可以快速测试变量
+const ck_ = 'FxLZAN3fOkfB9gYH71P4EPBcBjG22r0VjQw7w0wHYuGTp1fOzpsX27oNooY2n1T-'        // 可以快速测试变量
 
 
 //====================================================================================================
@@ -307,7 +307,7 @@ class User {
     constructor(str, id) {
         this.index = id
         this.ck_ = str.split("#")
-        this.remark = this.ck_[1]
+        this.remark = this.ck_[0]
         this.cookie = this.ck_[1]
         this.ts = this.getTimestamp(13);
         this.reqNonc = this.randomInt(100000, 999999);
@@ -462,6 +462,26 @@ class User {
             // 根据请求的返回 进行日志输出
             if (res.status === 200) {
                 this.log(`杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}! `, 1)
+            } else if (res.status === 500) {
+                this.log(`今日抽奖次数已用完，请明日再来！`,1)
+            } else {
+                this.log(res)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async SQlottery(){
+        try {
+            const options = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=376653438743296&channelSn=0',
+                headers:this.dls_headers
+            }
+            let {res} = await http.request(options,this.ck_flag);
+            if (res.status === 200) {
+                this.log(`杜蕾斯会员中心社群抽奖: 用户抽奖获得 ${res.data.prize.prize_name}! `, 1)
             } else if (res.status === 500) {
                 this.log(`今日抽奖次数已用完，请明日再来！`,1)
             } else {
