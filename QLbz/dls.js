@@ -395,6 +395,7 @@ class User {
     async userTask() {
         await this.Doapply()
         await this.lottery()
+        await this.SQlottery()
         await this.getinfo()  // 获取缓存的变量
     }
 
