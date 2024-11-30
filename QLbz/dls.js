@@ -396,6 +396,7 @@ class User {
         await this.Doapply()
         await this.lottery()
         await this.SQlottery()
+        await this.SQlotteryCX()
         await this.getinfo()  // 获取缓存的变量
     }
 
@@ -413,13 +414,9 @@ class User {
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
             //console.log(res)
-            if (res.status === 200) {
-                this.log(`杜蕾斯会员中心签到: 签到成功!, `, 1)
-            } else if (res.status === 500) {
-                this.log(`${res.msg}`,1)
-            } else {
-                this.log(res)
-            }
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
+            
         } catch (error) {
             console.log(error)
         }
@@ -437,13 +434,9 @@ class User {
             let {res} = await http.request(options, this.ck_flag);
             //console.log(res)
             // 根据请求的返回 进行日志输出
-            if (res.status === 200) {
-                this.log(`杜蕾斯会员中心: 用户 ${res.data.userInfo.nick_name}, 等级${res.data.userInfo.upgrade_code} , 累计积分 ${res.data.userInfo.points} !, `, 1)
-            } else if (res.status === 0) {
-                this.log(`今日已签到，请明日再来！`,1)
-            } else {
-                this.log(res)
-            }
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
+            
         } catch (error) {
             console.log(error)
         }
@@ -460,14 +453,8 @@ class User {
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
             //console.log(res)
-            // 根据请求的返回 进行日志输出
-            if (res.status === 200) {
-                this.log(`杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}! `, 1)
-            } else if (res.status === 500) {
-                this.log(`今日抽奖次数已用完，请明日再来！`,1)
-            } else {
-                this.log(res)
-            }
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
         } catch (error) {
             console.log(error)
         }
@@ -481,13 +468,25 @@ class User {
                 headers:this.dls_headers
             }
             let {res} = await http.request(options,this.ck_flag);
-            if (res.status === 200) {
-                this.log(`杜蕾斯会员中心社群抽奖: 用户抽奖获得 ${res.data.prize.prize_name}! `, 1)
-            } else if (res.status === 500) {
-                this.log(`今日抽奖次数已用完，请明日再来！`,1)
-            } else {
-                this.log(res)
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async SQlotteryCX(){
+        try {
+            const options = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/activity.record/list?snId=376653438743296',
+                headers:this.dls_headers
             }
+            let {res} = await http.request(options,this.ck_flag);
+
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
+            
         } catch (error) {
             console.log(error)
         }
@@ -504,14 +503,16 @@ class User {
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
             //console.log(res)
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
             // 根据请求的返回 进行日志输出
-            if (res.status === 200) {
-                this.log(`杜蕾斯会员中心抽奖: 剩余抽奖次数 ${res.data.user.draw_day_times}! `, 1)
-            } else if ({res}.data.user.draw_day_times === 0) {
-                this.log(`今日抽奖次数已用完，请明日再来！`,1)
-            } else {
-                this.log(res)
-            }
+            // if (res.status === 200) {
+            //     this.log(`杜蕾斯会员中心抽奖: 剩余抽奖次数 ${res.data.user.draw_day_times}! `, 1)
+            // } else if ({res}.data.user.draw_day_times === 0) {
+            //     this.log(`今日抽奖次数已用完，请明日再来！`,1)
+            // } else {
+            //     this.log(res)
+            // }
         } catch (error) {
             console.log(error)
         }
@@ -525,9 +526,74 @@ class User {
             sendLog.push(`${this.index}-${this.remark} ${message}`)
         }
     }
+    async handleResponse(url, res) {
+        switch (url) {
+            case 'https://vip.ixiliu.cn/mp/user/info': // 处理用户信息
+                if (res.status === 200) {
+                    return `杜蕾斯会员中心: 用户 ${res.data.userInfo.nick_name}, 等级 ${res.data.userInfo.upgrade_code}, 累计积分 ${res.data.userInfo.points}!`;
+                } else if (res.status === 0) {
+                    return `今日已签到，请明日再来！`;
+                } else {
+                    return `未知响应: ${res.message || '未知错误'}`;
+                }
+
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw': // 处理抽奖
+                if (res.status === 200) {
+                    return `杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}!`;
+                } else if (res.status === 500) {
+                    return `今日抽奖次数已用完，请明日再来！`;
+                } else {
+                    return `抽奖错误: ${res.message || '未知错误'}`;
+                }
+
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=379448676098688':  //获取抽奖次数
+                if (res.status === 200) {
+                    return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次!`;
+                } else if (res.status === 500) {
+                    return `今日抽奖次数已用完，请明日再来！`;
+                } else {
+                    return `抽奖错误: ${res.message || '未知错误'}`;
+                }
+
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=376653438743296&channelSn=0':
+                if (res.status === 200) {
+                    return `${res.data.lottery.active_name} ${res.message}成功!`;
+                } else if (res.status === 500) {
+                    return `今日抽奖次数已用完，请明日再来！`;
+                } else {
+                    return `抽奖错误: ${res.message || '未知错误'}`;
+                }
+
+            case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=376653438743296':
+                if (res.status === 200) {
+                    let prizeDetailsStr = '';  // 用来累积结果的字符串
+                    const prizeDetails = res.data?.list.map(item => ({
+                        create_time: item.create_time || '未知',
+                        prizeName: item.prize?.prize_name || '未知'
+                    }));
+
+                    prizeDetails.forEach((detail, index) => {
+                        prizeDetailsStr += `第 ${index + 1} 次:\n`;
+                        prizeDetailsStr += `抽奖时间: ${detail.create_time}\n`;
+                        prizeDetailsStr += `奖品名称: ${detail.prizeName}\n`;
+                    });
+
+                    return prizeDetailsStr || '没有抽奖记录';  // 如果没有记录，返回提示信息
+                } else if (res.status === 500) {
+                    return '今日抽奖次数已用完，请明日再来！';
+                } else {
+                    return `抽奖错误: ${res.message || '未知错误'}`;
+                }
+
+
+
+
+            default: // 处理其他请求
+                return `未知请求 URL: ${url}, 状态码: ${res.status}`;
+        }
+    }
+
 }
-
-
 // 创建一个用户列表类, 可以用来处理多账号
 class UserList {
     constructor(env) {
