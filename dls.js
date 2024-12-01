@@ -497,7 +497,7 @@ class User {
         try {
             const options = {
                 method: 'GET',
-                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=379448676098688',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608',
                 headers: this.dls_headers
             }
             // console.log(options)
@@ -529,7 +529,7 @@ class User {
     }
     async handleResponse(url, res) {
         switch (url) {
-            case 'https://vip.ixiliu.cn/mp/user/info': // 处理用户信息
+            case 'https://vip.ixiliu.cn/mp/user/info': // 处理用户信息（getinfo）
                 if (res.status === 200) {
                     return `杜蕾斯会员中心: 用户 ${res.data.userInfo.nick_name}, 等级 ${res.data.userInfo.upgrade_code}, 累计积分 ${res.data.userInfo.points}!`;
                 } else if (res.status === 0) {
@@ -538,7 +538,7 @@ class User {
                     return `未知响应: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0': // 处理每日会员中心抽奖
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0': // 处理每日会员中心抽奖（lottery）
                 if (res.status === 200) {
                     return `杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}!`;
                 } else if (res.status === 500) {
@@ -547,7 +547,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数(checklottery)
                 if (res.status === 200) {
                     return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次!`;
                 } else if (res.status === 500) {
@@ -556,7 +556,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0':  //获取社群当前抽奖结果
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0':  //获取社群当前抽奖结果（SQlottery）
                 if (res.status === 200) {
                     return `${res.data.lottery.active_name} ${res.message}成功!`;
                 } else if (res.status === 500) {
@@ -565,7 +565,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/sign/applyV2':  //获取当前签到结果
+            case 'https://vip.ixiliu.cn/mp/sign/applyV2':  //获取当前签到结果（Doapply）
                 if (res.status === 200) {
                     return `签到成功!`;
                 } else if (res.status === 500) {
@@ -575,7 +575,7 @@ class User {
                 }
 
 
-            case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=381955713996608':  //获取社群抽奖记录
+            case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=381955713996608':  //获取社群抽奖记录（SQlotteryCX）
                 if (res.status === 200) {
                     let prizeDetailsStr = '';  // 用来累积结果的字符串
                     const prizeDetails = res.data?.list.map(item => ({
