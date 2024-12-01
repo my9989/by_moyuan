@@ -18,7 +18,7 @@ let envSplit = ["\n", "&", "@"]         // 多个变量分隔符
 const ckFile = `${env}.txt`              // 不用管, 默认就是英文 名字.txt
 
 //====================================================================================================
-const ck_ = ''        // 可以快速测试变量
+const ck_ = '2U_LusGKeZi29lzTtiL1Gzg9_PMtc2SujTi_uAbj969tjuI7zg6ydcHiGaTotiwA#2'        // 可以快速测试变量
 
 
 //====================================================================================================
@@ -307,7 +307,7 @@ class User {
     constructor(str, id) {
         this.index = id
         this.ck_ = str.split("#")
-        this.remark = this.ck_[0]
+        this.remark = this.ck_[1]
         this.cookie = this.ck_[1]
         this.ts = this.getTimestamp(13);
         this.reqNonc = this.randomInt(100000, 999999);
@@ -394,6 +394,7 @@ class User {
     // 每个类的任务列表, 可以将需要做的任务都放这里
     async userTask() {
         await this.Doapply()
+        await this.checklottery()
         await this.lottery()
         await this.SQlottery()
         await this.SQlotteryCX()
@@ -416,7 +417,7 @@ class User {
             //console.log(res)
             const message = await this.handleResponse(options.url, res);
             this.log(message, 1);
-            
+
         } catch (error) {
             console.log(error)
         }
@@ -436,7 +437,7 @@ class User {
             // 根据请求的返回 进行日志输出
             const message = await this.handleResponse(options.url, res);
             this.log(message, 1);
-            
+
         } catch (error) {
             console.log(error)
         }
@@ -446,7 +447,7 @@ class User {
         try {
             const options = {
                 method: 'GET',
-                url: 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=379448676098688&channelSn=0',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0',
                 headers: this.dls_headers
             }
             // console.log(options)
@@ -486,7 +487,7 @@ class User {
 
             const message = await this.handleResponse(options.url, res);
             this.log(message, 1);
-            
+
         } catch (error) {
             console.log(error)
         }
@@ -537,7 +538,7 @@ class User {
                     return `未知响应: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw': // 处理抽奖
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0': // 处理每日会员中心抽奖
                 if (res.status === 200) {
                     return `杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}!`;
                 } else if (res.status === 500) {
@@ -546,7 +547,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=379448676098688':  //获取抽奖次数
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数
                 if (res.status === 200) {
                     return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次!`;
                 } else if (res.status === 500) {
@@ -555,7 +556,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=376653438743296&channelSn=0':
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0':  //获取社群当前抽奖结果
                 if (res.status === 200) {
                     return `${res.data.lottery.active_name} ${res.message}成功!`;
                 } else if (res.status === 500) {
@@ -564,7 +565,17 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=376653438743296':
+            case 'https://vip.ixiliu.cn/mp/sign/applyV2':  //获取当前签到结果
+                if (res.status === 200) {
+                    return `签到成功!`;
+                } else if (res.status === 500) {
+                    return `${res.msg}！`;
+                } else {
+                    return `抽奖错误: ${res.message || '未知错误'}`;
+                }
+
+
+            case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=381955713996608':  //获取社群抽奖记录
                 if (res.status === 200) {
                     let prizeDetailsStr = '';  // 用来累积结果的字符串
                     const prizeDetails = res.data?.list.map(item => ({
@@ -594,6 +605,9 @@ class User {
     }
 
 }
+
+
+
 // 创建一个用户列表类, 可以用来处理多账号
 class UserList {
     constructor(env) {
