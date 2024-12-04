@@ -18,7 +18,7 @@ let envSplit = ["\n", "&", "@"]         // 多个变量分隔符
 const ckFile = `${env}.txt`              // 不用管, 默认就是英文 名字.txt
 
 //====================================================================================================
-const ck_ = '2U_LusGKeZi29lzTtiL1Gzg9_PMtc2SujTi_uAbj969tjuI7zg6ydcHiGaTotiwA#2'        // 可以快速测试变量
+const ck_ = ''        // 可以快速测试变量
 
 
 //====================================================================================================
@@ -307,7 +307,7 @@ class User {
     constructor(str, id) {
         this.index = id
         this.ck_ = str.split("#")
-        this.remark = this.ck_[1]
+        this.remark = '';  //this.ck_[1]
         this.cookie = this.ck_[1]
         this.ts = this.getTimestamp(13);
         this.reqNonc = this.randomInt(100000, 999999);
@@ -391,8 +391,15 @@ class User {
         return sign;
     }
 
+    //向下取整
+    roundToNearestHundred(number) {
+        return Math.floor(number / 100) * 100;
+    }
+
     // 每个类的任务列表, 可以将需要做的任务都放这里
     async userTask() {
+        await this.guess2()
+        await this.guess()
         await this.Doapply()
         await this.checklottery()
         await this.lottery()
@@ -423,6 +430,54 @@ class User {
         }
     }
 
+    async guess2() {
+        try {
+            // 使用 options 组装请求参数
+            const options = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/guess.home/user?project_id=339311214237504',
+                headers:this.dls_headers
+            }
+
+            // console.log(options)
+            // 使用 封装的 got 请求库进行网络请求
+            let {res} = await http.request(options, this.ck_flag);
+            this.points = res.data.points;
+            this.points = this.roundToNearestHundred(this.points);
+            // console.log(this.points)
+            // const message = await this.handleResponse(options.url, res);
+            // this.log(message, 1);
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async guess(){
+        try {
+            const options = {
+                // method: 'GET',
+                method: 'POST',
+                url: 'https://vip.ixiliu.cn/mp/guess.user/stake-session',
+                headers:this.dls_headers,
+                json: {"project_id":339311214237504,
+                    "session_id":381780797284288,
+                    "team_id":381780797285120,
+                    "points":this.points,
+                    "subscribeStatus":0
+                }
+            };
+            //console.log(options);
+            let {res} = await http.request(options, this.ck_flag);
+            //console.log(res)
+            const message = await this.handleResponse(options.url, res);
+            this.log(message, 1);
+        }catch (error) {
+            console.log(error)
+        }
+    }
+
+
     async getinfo() {
         try {
             const options = {
@@ -430,7 +485,7 @@ class User {
                 url: 'https://vip.ixiliu.cn/mp/user/info',
                 headers: this.dls_headers
             }
-            // console.log(options)
+            //console.log(options)
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
             //console.log(res)
@@ -531,6 +586,7 @@ class User {
         switch (url) {
             case 'https://vip.ixiliu.cn/mp/user/info': // 处理用户信息（getinfo）
                 if (res.status === 200) {
+                    // console.log(this.points);
                     return `杜蕾斯会员中心: 用户 ${res.data.userInfo.nick_name}, 等级 ${res.data.userInfo.upgrade_code}, 累计积分 ${res.data.userInfo.points}!`;
                 } else if (res.status === 0) {
                     return `今日已签到，请明日再来！`;
@@ -574,6 +630,15 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
+            case 'https://vip.ixiliu.cn/mp/guess.user/stake-session':
+                if (res.status === 200) {
+                    console.log(res)
+                    return `押注成功!`;
+                } else if (res.status === 500) {
+                    return `${res.msg}！`;
+                } else {
+                    return `竞猜错误: ${res.message || '未知错误'}`;
+                }
 
             case 'https://vip.ixiliu.cn/mp/activity.record/list?snId=381955713996608':  //获取社群抽奖记录（SQlotteryCX）
                 if (res.status === 200) {
