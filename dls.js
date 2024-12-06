@@ -606,8 +606,14 @@ class User {
 
             case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数(checklottery)
                 if (res.status === 200 && res.data.user.draw_day_times > 0) {
-                    await this.lottery();
-                    return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
+                    // 先返回当前判断的消息
+                    const message = `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
+
+                    // 执行抽奖逻辑
+                    await this.lottery();  // 执行抽奖方法，等待其完成
+
+                    // 返回信息
+                    return message;
                 } else if (res.status === 500) {
                     return `今日抽奖次数已用完，请明日再来！`;
                 } else {
