@@ -307,7 +307,7 @@ class User {
     constructor(str, id) {
         this.index = id
         this.ck_ = str.split("#")
-        this.remark = '';  //this.ck_[1]
+        this.remark = this.ck_[1]
         this.cookie = this.ck_[1]
         this.ts = this.getTimestamp(13);
         this.reqNonc = this.randomInt(100000, 999999);
@@ -399,12 +399,10 @@ class User {
     // 每个类的任务列表, 可以将需要做的任务都放这里
     async userTask() {
         await this.guess2()
-        await this.guess()
         await this.Doapply()
         await this.checklottery()
-        await this.lottery()
-        await this.SQlottery()
-        await this.SQlotteryCX()
+        // await this.SQlottery()
+        // await this.SQlotteryCX()
         await this.getinfo()  // 获取缓存的变量
     }
 
@@ -444,6 +442,9 @@ class User {
             let {res} = await http.request(options, this.ck_flag);
             this.points = res.data.points;
             this.points = this.roundToNearestHundred(this.points);
+            if(this.points > 100){
+                await this.guess()
+            }
             // console.log(this.points)
             // const message = await this.handleResponse(options.url, res);
             // this.log(message, 1);
@@ -604,8 +605,9 @@ class User {
                 }
 
             case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数(checklottery)
-                if (res.status === 200) {
-                    return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次!`;
+                if (res.status === 200 && res.data.user.draw_day_times > 0) {
+                    await this.lottery();
+                    return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
                 } else if (res.status === 500) {
                     return `今日抽奖次数已用完，请明日再来！`;
                 } else {
@@ -630,7 +632,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/guess.user/stake-session':
+            case 'https://vip.ixiliu.cn/mp/guess.user/stake-session':  // 进行竞猜
                 if (res.status === 200) {
                     console.log(res)
                     return `押注成功!`;
