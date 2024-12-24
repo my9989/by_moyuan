@@ -401,6 +401,7 @@ class User {
         await this.guess2()
         await this.Doapply()
         await this.checklottery()
+        await this.lottery()
         // await this.SQlottery()
         // await this.SQlotteryCX()
         await this.getinfo()  // 获取缓存的变量
@@ -608,13 +609,13 @@ class User {
                 if (res.status === 200 ) {
                     if (res.data.user.draw_day_times > 0) {
                         // 如果剩余抽奖次数大于0，返回剩余次数并执行抽奖
-                        const message = `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
-
-                        // 执行抽奖并获取结果
-                        const lotteryResult = await this.lottery();  // 等待抽奖完成，获取结果
+                        // const message = `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
+                        //
+                        // // 执行抽奖并获取结果
+                        // const lotteryResult = await this.lottery();  // 等待抽奖完成，获取结果
 
                         // 返回信息
-                        return `${message}\n${lotteryResult}`;  // 返回剩余抽奖次数和开始抽奖的信息
+                        return `杜蕾斯会员中心抽奖: 用户剩余抽奖 ${res.data.user.draw_day_times}次，开始抽奖!`;
 
                     } else {
                         // 如果剩余抽奖次数为0，返回剩余次数的消息
