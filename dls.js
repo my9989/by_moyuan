@@ -401,7 +401,6 @@ class User {
         await this.guess2()
         await this.Doapply()
         await this.checklottery()
-        await this.lottery()
         // await this.SQlottery()
         // await this.SQlotteryCX()
         await this.getinfo()  // 获取缓存的变量
@@ -500,6 +499,34 @@ class User {
         }
     }
 
+    async checklottery() {
+        try {
+            const options = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608',
+                headers: this.dls_headers
+            }
+            // console.log(options)
+            // 使用 封装的 got 请求库进行网络请求
+            let {res} = await http.request(options, this.ck_flag);
+            //console.log(res)
+            this.cs = res.data.user.draw_day_times;
+            if(this.cs > 0){
+                await this.lottery()
+            }
+            // 根据请求的返回 进行日志输出
+            // if (res.status === 200) {
+            //     this.log(`杜蕾斯会员中心抽奖: 剩余抽奖次数 ${res.data.user.draw_day_times}! `, 1)
+            // } else if ({res}.data.user.draw_day_times === 0) {
+            //     this.log(`今日抽奖次数已用完，请明日再来！`,1)
+            // } else {
+            //     this.log(res)
+            // }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
     async lottery() {
         try {
             const options = {
@@ -550,31 +577,6 @@ class User {
         }
     }
 
-    async checklottery() {
-        try {
-            const options = {
-                method: 'GET',
-                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608',
-                headers: this.dls_headers
-            }
-            // console.log(options)
-            // 使用 封装的 got 请求库进行网络请求
-            let {res} = await http.request(options, this.ck_flag);
-            //console.log(res)
-            const message = await this.handleResponse(options.url, res);
-            this.log(message, 1);
-            // 根据请求的返回 进行日志输出
-            // if (res.status === 200) {
-            //     this.log(`杜蕾斯会员中心抽奖: 剩余抽奖次数 ${res.data.user.draw_day_times}! `, 1)
-            // } else if ({res}.data.user.draw_day_times === 0) {
-            //     this.log(`今日抽奖次数已用完，请明日再来！`,1)
-            // } else {
-            //     this.log(res)
-            // }
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     // 自己封装的打印函数
     log(message, pushCode = 0) {
