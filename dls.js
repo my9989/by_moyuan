@@ -16,7 +16,11 @@ const mode = 1  // 并发-2   顺序-1
 const runMax = 3  // 最大并发数量
 let envSplit = ["\n", "&", "@"]         // 多个变量分隔符
 const ckFile = `${env}.txt`              // 不用管, 默认就是英文 名字.txt
-
+const envVariables = {
+    dls: process.env.dls,
+    dlsjc: process.env.dlsjc,
+    dlssqid: process.env.dlssqid
+}
 //====================================================================================================
 const ck_ = ''        // 可以快速测试变量
 
@@ -325,6 +329,8 @@ class User {
             'referer': 'https://servicewechat.com/wxe11089c85860ec02/34/page-frame.html',
             'accept-language': 'zh-CN,zh;q=0.9'
         };
+        this.tmid = process.env.dlsjc;
+        this.jcid = null;
         this.set_this();
     }
     set_this() {
@@ -398,12 +404,13 @@ class User {
 
     // 每个类的任务列表, 可以将需要做的任务都放这里
     async userTask() {
+        await this.guess3()
         await this.guess2()
         await this.Doapply()
         await this.checklottery()
         // await this.SQlottery()
         // await this.SQlotteryCX()
-        await this.getinfo()  // 获取缓存的变量
+        await this.getinfo()
     }
 
     // 具体功能实现函数   可以多个 自己复制就行
@@ -422,6 +429,30 @@ class User {
             //console.log(res)
             const message = await this.handleResponse(options.url, res);
             this.log(message, 1);
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async guess3() {
+        try {
+            // 使用 options 组装请求参数
+            const options = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/guess.home/index?project_id=0',
+                headers:this.dls_headers
+            }
+
+            // console.log(options)
+            // 使用 封装的 got 请求库进行网络请求
+            let {res} = await http.request(options, this.ck_flag);
+            const session = res.data.sessionList[0];
+            const team = session.teamList[this.tmid];
+            const teamId = team ? team.team_id : null;
+            this.jcid = teamId;
+            // const message = await this.handleResponse(options.url, res);
+            // this.log(message, 1);
 
         } catch (error) {
             console.log(error)
@@ -461,9 +492,9 @@ class User {
                 method: 'POST',
                 url: 'https://vip.ixiliu.cn/mp/guess.user/stake-session',
                 headers:this.dls_headers,
-                json: {"project_id":339311214237504,
-                    "session_id":381780797284288,
-                    "team_id":381780797285120,
+                json: {"project_id":0,
+                    "session_id":387593303037952,
+                    "team_id":this.jcid,
                     "points":this.points,
                     "subscribeStatus":0
                 }
