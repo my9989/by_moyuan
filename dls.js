@@ -448,11 +448,11 @@ class User {
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
             const session = res.data.sessionList[0];
+            const sessionid = res.data.sessionList[0].id;
             const team = session.teamList[this.tmid];
             const teamId = team ? team.team_id : null;
             this.jcid = teamId;
-            // const message = await this.handleResponse(options.url, res);
-            // this.log(message, 1);
+            return sessionid;
 
         } catch (error) {
             console.log(error)
