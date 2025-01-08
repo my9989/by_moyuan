@@ -329,8 +329,26 @@ class User {
             'referer': 'https://servicewechat.com/wxe11089c85860ec02/34/page-frame.html',
             'accept-language': 'zh-CN,zh;q=0.9'
         };
+        this.dlsjc_headers = {
+            'host': 'vip.ixiliu.cn',
+            'content-type': 'application/json;charset=utf-8',
+            'sid': '10006',
+            'xweb_xhr': '1',
+            'platform': 'MP-WEIXIN',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090b19)XWEB/11529',
+            'enterprise-hash': '10006',
+            'access-token': this.ck_,
+            'accept': '*/*',
+            'sec-fetch-site': 'cross-site',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-dest': 'empty',
+            'referer': 'https://servicewechat.com/wxe11089c85860ec02/42/page-frame.html',
+            'accept-encoding': 'gzip, deflate, br',
+            'accept-language': 'zh-CN,zh;q=0.9'
+        };
         this.tmid = process.env.dlsjc;
         this.jcid = null;
+        this.sessionid = null;
         this.set_this();
     }
     set_this() {
@@ -406,11 +424,12 @@ class User {
     async userTask() {
         await this.guess3()
         await this.guess2()
+        await this.guess()
         await this.Doapply()
         await this.checklottery()
         // await this.SQlottery()
         // await this.SQlotteryCX()
-        await this.getinfo()
+        await this.getinfo()  // 获取缓存的变量
     }
 
     // 具体功能实现函数   可以多个 自己复制就行
@@ -441,18 +460,21 @@ class User {
             const options = {
                 method: 'GET',
                 url: 'https://vip.ixiliu.cn/mp/guess.home/index?project_id=0',
-                headers:this.dls_headers
+                headers: this.dlsjc_headers
             }
 
             // console.log(options)
             // 使用 封装的 got 请求库进行网络请求
             let {res} = await http.request(options, this.ck_flag);
+            //console.log(res)
             const session = res.data.sessionList[0];
             const sessionid = res.data.sessionList[0].id;
             const team = session.teamList[this.tmid];
             const teamId = team ? team.team_id : null;
             this.jcid = teamId;
-            return sessionid;
+            this.sessionid = sessionid;
+            // const message = await this.handleResponse(options.url, res);
+            // this.log(message, 1);
 
         } catch (error) {
             console.log(error)
@@ -473,9 +495,9 @@ class User {
             let {res} = await http.request(options, this.ck_flag);
             this.points = res.data.points;
             this.points = this.roundToNearestHundred(this.points);
-            if(this.points > 100){
-                await this.guess()
-            }
+            // if(this.points > 100){
+            //     await this.guess()
+            // }
             // console.log(this.points)
             // const message = await this.handleResponse(options.url, res);
             // this.log(message, 1);
@@ -491,12 +513,13 @@ class User {
                 // method: 'GET',
                 method: 'POST',
                 url: 'https://vip.ixiliu.cn/mp/guess.user/stake-session',
-                headers:this.dls_headers,
-                json: {"project_id":0,
-                    "session_id":387593303037952,
-                    "team_id":this.jcid,
-                    "points":this.points,
-                    "subscribeStatus":0
+                headers: this.dlsjc_headers,
+                json: {
+                    "project_id": 0,
+                    "session_id": this.sessionid,
+                    "team_id": this.jcid,
+                    "points": this.points,
+                    "subscribeStatus": 0
                 }
             };
             //console.log(options);
