@@ -475,6 +475,7 @@ class User {
             this.sessionid = sessionid;
             // const message = await this.handleResponse(options.url, res);
             // this.log(message, 1);
+            return `${res.data.sessionList[0].title}`;
 
         } catch (error) {
             console.log(error)
