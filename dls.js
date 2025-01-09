@@ -510,6 +510,10 @@ class User {
 
     async guess(){
         try {
+            if (this.jcid === undefined) {
+                console.log("竞猜未选定，跳过下注");
+                return; // 直接退出函数
+            }
             const options = {
                 // method: 'GET',
                 method: 'POST',
