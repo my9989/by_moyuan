@@ -19,7 +19,7 @@ const ckFile = `${env}.txt`              // 不用管, 默认就是英文 名字
 const envVariables = {
     dls: process.env.dls,
     dlsjc: process.env.dlsjc,
-    dlssqid: process.env.dlssqid
+    dlssnid: process.env.dlssnid
 }
 //====================================================================================================
 const ck_ = ''        // 可以快速测试变量
@@ -347,6 +347,7 @@ class User {
             'accept-language': 'zh-CN,zh;q=0.9'
         };
         this.tmid = process.env.dlsjc;
+        this.dlssnid = process.env.dlssnid;
         this.jcid = null;
         this.sessionid = null;
         this.set_this();
@@ -560,19 +561,29 @@ class User {
 
     async checklottery() {
         try {
-            const options = {
+            const lotteryfw = {
                 method: 'GET',
-                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/content?snId=' + this.dlssnid,
                 headers: this.dls_headers
             }
             // console.log(options)
             // 使用 封装的 got 请求库进行网络请求
-            let {res} = await http.request(options, this.ck_flag);
+            let {res: firstRes} = await http.request(lotteryfw, this.ck_flag);
             //console.log(res)
-            this.cs = res.data.user.draw_day_times;
+            const lotterycx = {
+                method: 'GET',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=' + this.dlssnid,
+                headers: this.dls_headers
+            }
+
+            let {res: secondRes} = await http.request(lotterycx, this.ck_flag);
+
+            this.cs = secondRes.data.user.draw_day_times;
             if(this.cs > 0){
                 await this.lottery()
             }
+            //const message = await this.handleResponse(options.url, res);
+            // this.log(message, 1);
             // 根据请求的返回 进行日志输出
             // if (res.status === 200) {
             //     this.log(`杜蕾斯会员中心抽奖: 剩余抽奖次数 ${res.data.user.draw_day_times}! `, 1)
@@ -590,7 +601,7 @@ class User {
         try {
             const options = {
                 method: 'GET',
-                url: 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0',
+                url: 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=' + this.dlssnid + '&channelSn=0',
                 headers: this.dls_headers
             }
             // console.log(options)
@@ -657,7 +668,7 @@ class User {
                     return `未知响应: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=381955713996608&channelSn=0': // 处理每日会员中心抽奖（lottery）
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/draw?snId=' + this.dlssnid + '&channelSn=0': // 处理每日会员中心抽奖（lottery）
                 if (res.status === 200) {
                     return `杜蕾斯会员中心抽奖: 用户抽奖获得 ${res.data.prize.prize_name}!`;
                 } else if (res.status === 500) {
@@ -666,7 +677,7 @@ class User {
                     return `抽奖错误: ${res.message || '未知错误'}`;
                 }
 
-            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=381955713996608':  //获取每日抽奖次数(checklottery)
+            case 'https://vip.ixiliu.cn/mp/activity.lottery/getUserInfoV2?snId=' + this.dlssnid:  //获取每日抽奖次数(checklottery)
                 if (res.status === 200 ) {
                     if (res.data.user.draw_day_times > 0) {
                         // 如果剩余抽奖次数大于0，返回剩余次数并执行抽奖
